@@ -1,0 +1,4 @@
+Criação de registros.
+
+so cria um repositorio se formos ter um metodo personalizado, if we not need
+created new method whe just need to used the defautl methods.

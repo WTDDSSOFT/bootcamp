@@ -1,0 +1,40 @@
+lecture 1
+Model e migration do user.
+******************************************
+migration Users
+  data de criação
+  {
+    name: 'created_id',
+    type: 'timetamp',
+    default: 'now()',
+  },
+  data of update
+  {
+    name: 'update_id',
+    type: 'timetamp',
+    default: 'now()',
+  },
+
+dicas
+  não precisamos entender a complexidade de uma funcionalidade, so la pra frente
+  e devemos nos aprofundar.
+  1.entender a pratica
+  2.procura a teoria.
+******************************************
+
+lecture 2
+Relacionamento nos Models
+******************************************
+migration Alter
+
+new TableForeignKey({
+        columnNames: ['provider_id'], => qual/ quias a coluna que vai receber a chave estrangeira
+        referencedColumnNames: ['id'],=> qual o nome da coluna  na table to the user que vai representar esse provider_id
+        referencedTableName: 'users',=>  qual o nome da tabela que vai fazer refencia com esse campo . table de usuers
+        onDelete: 'SET NULL ',=> o que vai acontece com appoitments caso o user fo deletado
+                                  1.RESTRICT - bloquia n deixa o user se deletado
+                                  2.SET NULL - deixa como null
+                                  3.CASCADE  - deleta todos os appoitments relacionados com o user
+        onUpdate: 'CASCADE',=> Caso o id, for Alterado ultilizo  o CASCADE.
+      })
+******************************************

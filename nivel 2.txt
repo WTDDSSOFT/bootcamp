@@ -1,0 +1,240 @@
+nivel 2
+***************************************
+lecture 2
+
+conceitos
+  1 - dividir o arquivo de rotas de acordo com cada entidade da nossa aplicação.
+***************************************
+
+***************************************
+lecture 3
+
+libery
+yarn add date-fns -> library for date and houres on js
+
+parseISO- convert o date de string for date format, native js date
+***************************************
+lecture 4 model & agendamentos.
+entidade(model)
+
+lecture 5 - conceitos de repositorios.
+uma conecção com :
+Persistencia <-> Repositorios <-> Rota
+dentro do repositorio: busca as informações que estão Persistidas ex:
+dentro do banco ou dentro de uma variavel.
+
+model -> formato dos dados.
+
+repository-> o detentor responsavel pelas operações que vamos fazer sobre
+os dados na nossa aplicação.
+
+
+lecutre 6
+trabalhando com dados.
+DTO - data transfer Object.
+
+lecutre 7 Services & Solid.
+
+route -> receber a requisição, chamar outro arquivo, devolver uma resposta.
+
+regra de negocio-> tudo aquilo que e muito especificos da aplicação.
+
+Iniciando back-end do app.
+
+lecutre 1 Estrategia de abstração.
+  ORM
+  knex.js <- query build
+  squelize
+  node-postgres. <- driver nativo.
+  typeORM. <- ORM
+
+lecture 02 Docker.
+how work.
+  Criação de ambientes isolados(container).
+  Containers expõe portas para comunicação.
+Principais conceitos.
+  Imagem - servico disponivel do docker(ferramentas, tecnologias).
+  Contaienr - uma instancia de uma imagem.
+  Docker registry (Docker Hub).
+  Dockerfile
+    Receita de uma imagem.
+lecutre 3 Criando container do banco.
+imagem do postgreSQL.
+  docker run --name gostack_postegres(nome do banco) -e POSTRES_PASSWORD=docker(password do banco) -p 5432(porta do sistema):5432(porta do container) -d postgres(versão)
+  docker run --name gostack_postegres -e POSTGRES_PASSWORD=docker -p 5432:5432 -d postgres
+  verifica se a porta esta livre
+    lsof - i: 5432
+  se tive problema para instalar a imagem do postgres, troca o nameserver para  8.8.8.8.
+  sudo nano /etc/resolv.conf
+    nameserver:  8.8.8.8
+    link: https://github.com/moby/moby/issues/24344
+  dbeaver
+    https://dbeaver.io/
+
+lecutre 4 criando a conecção com db.
+
+  setup
+    ormconfig.json -> aqui fica a configuração da conecção com db.
+    yarn typeorm  pg->drive do postgres
+    // configuração do db
+    {
+    "type":"postgres",
+    "host":"localhost",
+    "port":5432,
+    "username":"postgres",
+    "passsword":"docker",
+    "database":"gostack_gobarber"
+    }
+**********************************************
+lecutre 5 criando a table da appointements.
+ormconfig
+{
+"type":"postgres",
+"host":"localhost",
+"port":5432,
+"username":"postgres",
+"password":"docker",
+"database":"gostack_gobarber",
+"migrations":[
+  aqui passa o caminho
+  "./src/database/migrations/*.ts"
+],
+"cli":{
+  "migrationsDir":"./src/database/migrations/"
+}
+}
+typeorm tem suporte tanto para aplicação em typecript como em javascript
+default -> js
+setup orm for read from packagejson
+ "typeorm":"ts-node-dev ./node_modules/typeorm/cli.js"
+
+O que migrations:
+  controlam a versões do db e controlam  alterações simultaneas dentro do db
+  contem as instruções do que sera feito do db.
+  evitar os db ficarem em versões diferentes no projeto
+
+Criando migration
+❯ yarn typeorm migration:create -n CreateAppointements
+
+"class-methods-use-this":"off" desabilita erros na class
+
+execulta migration
+  yarn  typeorm migration:run
+  yarn typeorm migration:revert
+  yarn typeorm migration:show
+  so posso altera uma migration se ele não foi envia ainda para o git
+  ,ou seja so existe na minha maquina, se não obrigatiriamente precisa cria um migration nova com as alterações
+
+lecutre 6 Criando  model de agendamento
+    eslint.json
+     habilita ultilizar a funcionalidade decoretors do js.
+     "experimentalDecorators": true,        /* Enables experimental support for ES7 decorators. */
+     "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
+model
+import { Entity } from 'typeorm'; // algo que vai ser salvo no db
+/** decoretor
+ * Funciona com ser foçe uma função
+ * vai pega a função Entity e como parametro para essa função vai enviar
+ * a classe Apointments, ou seja a class e um parametro da Entity
+ */
+@Entity('appointments') // passando o nome da table on db.
+
+/**
+   *  no typeorm não preciso cria um constructor, por que o proprio typeorm
+   * cria automatico
+   */
+  // passa parametros, para quando for cria new appointments, ja crier com os tipos
+  /**
+   * Omit->excluir uma proproiedade dento de um tipo
+   *  */
+  // constructor({ provider, date }: Omit<Appointment, 'id'>) {
+  //   /** */
+  //   this.id = uuid();
+  //   this.provider = provider;
+  //   this.date = date;
+  //}
+
+  inside to the tsconfig.json , change to false
+       "strictPropertyInitialization": true -> false,  /* Enable strict checking of property initialization in classes. */
+
+
+***************************************************
+
+lecutre 7  repositorio do typeorm
+
+O proprio typeorm tem os metodos para consulta os dados no db.
+
+import { isEqual } from 'date-fns';
+import { EntityRepository, Repository } from 'typeorm';
+
+import Appointement from '../models/Appointments';
+
+// aqui estão o formato dos appointments
+
+// arquivo responsavel por tudo que vair mexer nos dados de appointements de
+// alguma forma.
+
+/** o repositorio o detentor responsavel pelas operações que vamos fazer sobre
+ * os dados na nossa aplicação.
+ */
+// interface CreateAppointementsDTO {
+//   provider: string;
+//   date: Date;
+// }
+
+/** ultlizando o typeorm */
+@EntityRepository(Appointement)
+// extendendo a classe
+class AppointementsRepository extends Repository<Appointement> {
+  // aqui e uma interface Repository<Appointement> <- parametro de uma tipagem recebe o model
+  /** Armazena os agendamentos  */
+  // private appointements: Appointement[];
+
+  // constructor() {
+  //   this.appointements = [];
+  // }
+
+  // /** ************************* */
+  // /** method get all appointments */
+  // public all(): Appointement[] {
+  //   return this.appointements;
+  // }
+
+  // encontra um agendamento numa data espscifica
+  public findByDate(date: Date): Appointement | null {
+    // formato de retorno
+    // retorno do metodo
+    // const findAppointments = this.appointements.find(appointment =>
+    //   isEqual(date, appointment.date),
+    // );
+    // aqui e um else(si não).
+    return findAppointments || null;
+  }
+
+  /** **************************** */
+
+  /** metodo Cria agendamento(Appointments) */
+  // public create({ provider, date }: CreateAppointementsDTO): Appointement {
+  //   const appointment = new Appointement({ provider, date });
+
+  //   this.appointements.push(appointment);
+
+  //   return appointment;
+  // }
+  /** ***************************** */
+appointements routes.ts
+// const appointments: Appointment[] = []; // setando o tipo no array,o tipo dessa variavel e um array de appointments
+// const appointmentsRepository = new AppointmentsRepository();
+
+/** interface -> e quando definomos o tipo de um objeto/
+ * informação composta,informação que não e simples */
+// interface Appointment {
+//   id: string;
+//   provider: string;
+//   date: Date;
+// }
+// salvando os agendamentos.
+
+}
+***************************************************
+
